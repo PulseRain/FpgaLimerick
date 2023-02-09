@@ -1,2 +1,2 @@
-# FPGA Limick
+# FPGA Limerick
 Repo for FPGA Limerick

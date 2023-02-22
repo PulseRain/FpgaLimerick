@@ -8,7 +8,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-// http://www.apache.org/licenses/LICENSE-2.0
+// https://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,7 +33,7 @@ case class NcoCounter(
   val io = new Bundle {
     val srst = in Bool () // sync reset
     val ncoPulse = out(RegInit(False)) // output pulse
-    val couterOut = out(Bits(log2Up(m) bits)) // counter value output
+    val counterOut = out(Bits(log2Up(m) bits)) // counter value output
   }
 
   noIoPrefix()
@@ -50,7 +50,7 @@ case class NcoCounter(
   // ==================================================================================================================
   // Datapath
   // ==================================================================================================================
-  io.couterOut := rateNco.asBits
+  io.counterOut := rateNco.asBits
 
   when(io.srst) {
     rateNco.clearAll()

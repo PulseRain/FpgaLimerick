@@ -157,21 +157,9 @@ def test_nco(request, G_CLK_RATE, G_OUTPUT_RATE):
         f.write(str(int(G_OUTPUT_RATE)))
         f.close()
     
-    if (os.path.exists("sim_build/modelsim.ini")):
-        print (f"===> modelsim.ini already exists!!")
-    else:
-        lines = [r"[Library]", "\n",
-                 r"others = $MODEL_TECH/../modelsim.ini", "\n"]
-                 
-        os.makedirs("sim_build", exist_ok=True)
-        with open('sim_build/modelsim.ini', 'w') as f:
-            f.writelines(lines)
-            f.close()
-            
     verilog_sources = [
         "../../../gen/NcoCounter.v"
     ]
-    
     
     ##############################################################################################
     ## Sim and Test Bench

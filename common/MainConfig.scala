@@ -27,5 +27,6 @@ object MainConfig
       defaultConfigForClockDomains =
         ClockDomainConfig(clockEdge = RISING, resetKind = ASYNC, resetActiveLevel = LOW, softResetActiveLevel = HIGH),
       targetDirectory = "gen",
+      verbose = false,
       onlyStdLogicVectorAtTopLevelIo = true
     )

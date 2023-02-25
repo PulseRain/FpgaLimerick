@@ -67,10 +67,25 @@ case class NcoCounter(
 
 object NcoCounter {
   def main(args: Array[String]): Unit = {
-    val C_CLK_RATE: Int = 100000000
-    val C_OUTPUT_RATE: Int = 24000000
+    val C_DEFAULT_CLK_RATE: Int = 100000000
+    val C_DEFAULT_OUTPUT_RATE: Int = 24000000
 
-    MainConfig.generateVhdl(NcoCounter(G_CLK_RATE = C_CLK_RATE, G_OUTPUT_RATE = C_OUTPUT_RATE))
-    MainConfig.generateVerilog(NcoCounter(G_CLK_RATE = C_CLK_RATE, G_OUTPUT_RATE = C_OUTPUT_RATE))
+    var clkRate: Int = C_DEFAULT_CLK_RATE
+    var outputRate: Int = C_DEFAULT_OUTPUT_RATE
+
+    if (args.length >= 1) {
+      clkRate = args(0).toInt
+    }
+
+    if (args.length > 1) {
+      outputRate = args(1).toInt
+    }
+
+    println("==============================================================================")
+    printf("=== Generate NcoCounter, CLK_RATE = %d Hz, OUTPUT_RATE = %d Hz\n", clkRate, outputRate)
+    println("==============================================================================")
+
+    MainConfig.generateVhdl(NcoCounter(G_CLK_RATE = clkRate, G_OUTPUT_RATE = outputRate))
+    MainConfig.generateVerilog(NcoCounter(G_CLK_RATE = clkRate, G_OUTPUT_RATE = outputRate))
   }
 }

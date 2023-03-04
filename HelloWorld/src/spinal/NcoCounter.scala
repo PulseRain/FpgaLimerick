@@ -23,6 +23,7 @@ package com.pulserain.fpga
 import common.Utils._
 import common._
 import spinal.core._
+import org.apache.logging.log4j.scala._
 
 case class NcoCounter(
     G_CLK_RATE: Int, // main clock rate in Hz
@@ -65,7 +66,7 @@ case class NcoCounter(
   }
 }
 
-object NcoCounter {
+object NcoCounter extends Logging {
   def main(args: Array[String]): Unit = {
     val C_DEFAULT_CLK_RATE: Int = 100000000
     val C_DEFAULT_OUTPUT_RATE: Int = 24000000
@@ -81,9 +82,9 @@ object NcoCounter {
       outputRate = args(1).toInt
     }
 
-    println("==============================================================================")
-    printf("=== Generate NcoCounter, CLK_RATE = %d Hz, OUTPUT_RATE = %d Hz\n", clkRate, outputRate)
-    println("==============================================================================")
+    logger.info("==============================================================================")
+    logger.info(s"=== Generate NcoCounter, CLK_RATE = $clkRate Hz, OUTPUT_RATE = $outputRate Hz")
+    logger.info("==============================================================================")
 
     MainConfig.generateVhdl(NcoCounter(G_CLK_RATE = clkRate, G_OUTPUT_RATE = outputRate))
     MainConfig.generateVerilog(NcoCounter(G_CLK_RATE = clkRate, G_OUTPUT_RATE = outputRate))

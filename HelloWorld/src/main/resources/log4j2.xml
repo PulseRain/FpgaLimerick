@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO">
+  <Properties>
+    <Property name="basePath">./logs</Property>
+  </Properties>
+
+  <Appenders>
+    <Console name="Console" target="SYSTEM_OUT">
+      <PatternLayout pattern="%d{HH:mm:ss} [%t] %-5level- %msg%n"/>
+    </Console>
+    
+    <RollingFile name="fileLogger"
+      fileName="${basePath}/run.log"
+      filePattern="${basePath}/run-%d{yyyy-MM-dd}.log">
+      <PatternLayout>
+        <pattern>[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n
+        </pattern>
+      </PatternLayout>
+      <Policies>
+        <TimeBasedTriggeringPolicy interval="1" modulate="true" />
+        <SizeBasedTriggeringPolicy size="10MB" />
+      </Policies>
+      <!-- Max 10 files will be created everyday -->
+      <DefaultRolloverStrategy max="10">
+        <Delete basePath="${basePathr}" maxDepth="10">
+          <!-- Delete all files older than 30 days -->
+          <IfLastModified age="30d" />
+        </Delete>
+      </DefaultRolloverStrategy>
+    </RollingFile>
+    
+  </Appenders>
+  <Loggers>
+    <Root level="info">
+      <AppenderRef ref="Console"/>
+      <AppenderRef ref="fileLogger" />
+    </Root>
+    
+  </Loggers>
+</Configuration>

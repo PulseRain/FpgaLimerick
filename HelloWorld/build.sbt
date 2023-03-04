@@ -10,6 +10,9 @@ val spinalCore = "com.github.spinalhdl" %% "spinalhdl-core" % spinalVersion
 val spinalLib = "com.github.spinalhdl" %% "spinalhdl-lib" % spinalVersion
 val spinalIdslPlugin = compilerPlugin("com.github.spinalhdl" %% "spinalhdl-idsl-plugin" % spinalVersion)
 
+val log4jApi = "org.apache.logging.log4j" %% "log4j-api-scala" % "12.0"
+val log4jCore = "org.apache.logging.log4j" % "log4j-core" % "2.19.0" % Runtime
+
 
 Compile / scalaSource := baseDirectory.value / "src" / "spinal"
 Compile / unmanagedSourceDirectories += baseDirectory.value / "../common"
@@ -24,7 +27,7 @@ Compile / scalastyleSources := {
       scalaSourceFiles ++ otherSourceFiles.filterNot(_.getAbsolutePath.replaceAll("\\\\", "/").contains("test/spinal"))
 }
 
-libraryDependencies ++= Seq(spinalCore, spinalLib, spinalIdslPlugin)
+libraryDependencies ++= Seq(spinalCore, spinalLib, spinalIdslPlugin, log4jApi, log4jCore)
 
 fork := true
 

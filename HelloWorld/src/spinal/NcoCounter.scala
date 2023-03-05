@@ -82,6 +82,7 @@ object NcoCounter extends Logging {
       outputRate = args(1).toInt
     }
 
+    logger.info(" ")
     logger.info("==============================================================================")
     logger.info(s"=== Generate NcoCounter, CLK_RATE = $clkRate Hz, OUTPUT_RATE = $outputRate Hz")
     logger.info("==============================================================================")

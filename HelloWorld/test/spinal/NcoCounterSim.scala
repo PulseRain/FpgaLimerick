@@ -2,8 +2,9 @@ package com.pulserain.fpga
 
 import common.MainConfig
 import spinal.core.sim._
+import org.apache.logging.log4j.scala._
 
-object NcoCounterSim {
+object NcoCounterSim extends Logging {
   def main(args: Array[String]): Unit = {
 
     val C_MAIN_CLK: Int = 100000000
@@ -25,6 +26,11 @@ object NcoCounterSim {
         var start = false
         var outputPulseCnt: Int = 0
         var runLength: Int = 0
+        
+        logger.info(" ")
+        logger.info("====================================================================================")
+        logger.info(s"=== NcoCounter Simulation, G_CLK_RATE = $C_MAIN_CLK Hz, G_OUTPUT_RATE = $C_OUT_CLK Hz")
+        logger.info("====================================================================================")
 
         val clkThread = fork {
           dut.io.srst #= false
@@ -38,7 +44,7 @@ object NcoCounterSim {
 
           dut.clockDomain.deassertReset()
 
-          println("=========== start")
+          logger.info("=========== start")
           dut.clockDomain.waitRisingEdge(10)
           dut.io.srst #= false
           dut.clockDomain.waitRisingEdge()
@@ -52,7 +58,7 @@ object NcoCounterSim {
             dut.clockDomain.waitRisingEdge()
           }
 
-          println("=========== done")
+          logger.info("=========== done")
         }
 
         val monitor_output_rate = fork {
@@ -83,14 +89,14 @@ object NcoCounterSim {
         dut.clockDomain.waitRisingEdge(10)
         val measured: Double = outputPulseCnt.toDouble * 100 / runLength.toDouble
         val expected: Double = C_OUT_CLK.toDouble * 100 / C_MAIN_CLK.toDouble
-        printf("==== measured %d / %d = %2f MHz, expected %2f MHz\n", outputPulseCnt, runLength, measured, expected)
+        logger.info(f"==== measured $outputPulseCnt / $runLength = $measured%2f MHz, expected $expected%2f MHz")
         if ((expected - measured).abs < 0.001) {
-          printf("=== Output clock is accurate enough!\n")
+          logger.info("=== Output clock is accurate enough!")
           simSuccess()
         } else {
+          logger.info("=== Output clock is not accurate enough!")
           simFailure("=== Output clock is not accurate enough!\n")
         }
-
       }
   }
 }

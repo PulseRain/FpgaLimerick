@@ -33,3 +33,6 @@ fork := true
 
 scalacOptions += "-deprecation"
 scalacOptions += "-Ywarn-unused-import"
+scalacOptions += "-feature"
+scalacOptions += "-language:reflectiveCalls"
+

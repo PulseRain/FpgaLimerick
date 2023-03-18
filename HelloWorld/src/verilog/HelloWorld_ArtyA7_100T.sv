@@ -129,14 +129,14 @@ module HelloWorld_ArtyA7_100T #(
   assign LD2_GREEN = 1'b0;
   assign LD2_BLUE  = ncoLED;
 
-  assign LD3_RED   = 1'b0;
+  assign LD3_RED   = BTN3;
   assign LD3_GREEN = 1'b0;
   assign LD3_BLUE  = 1'b0;
 
   assign LD4       = 1'b0;
   assign LD5       = 1'b0;
   assign LD6       = 1'b0;
-  assign LD7       = 1'b0;
+  assign LD7       = BTN2;
 
 endmodule
 

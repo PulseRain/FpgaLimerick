@@ -23,7 +23,7 @@
 cd ..\..\HelloWorld && call sbt "runMain com.pulserain.fpga.NcoCounter 100000000 3"
 echo on
 
-cd ..\SwitchDebouncer && call sbt "runMain com.pulserain.fpga.SwitchDebouncer 100000000 16"
+cd ..\SwitchDebouncer && call sbt "runMain com.pulserain.fpga.SwitchDebouncer 100000000 15"
 echo on
 
 cd synth && call vivado -mode batch -source build.tcl -tclargs %prj_name%

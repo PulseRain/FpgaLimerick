@@ -14,7 +14,7 @@ object NcoCounterSim extends Logging {
       .withConfig {
         MainConfig
       }
-      .withWave
+      .withFstWave
       .compile {
         val dut = NcoCounter(G_CLK_RATE = C_MAIN_CLK, G_OUTPUT_RATE = C_OUT_CLK)
         dut

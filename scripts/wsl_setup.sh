@@ -33,7 +33,7 @@ sudo apt install net-tools -y
 sudo apt-get install autoconf -y
 sudo apt-get install flex -y
 sudo apt-get install bison -y
-
+sudo apt-get install gtkwave -y
 
 ##############################################################################
 # Install Verilator

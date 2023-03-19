@@ -2,7 +2,9 @@ package com.pulserain.fpga
 
 import common.MainConfig
 import spinal.core.sim._
+import scala.io.Source._
 import org.apache.logging.log4j.scala._
+import scala.util.control.Breaks._
 
 object NcoCounterSim extends Logging {
   def main(args: Array[String]): Unit = {
@@ -26,7 +28,7 @@ object NcoCounterSim extends Logging {
         var start = false
         var outputPulseCnt: Int = 0
         var runLength: Int = 0
-        
+
         logger.info(" ")
         logger.info("====================================================================================")
         logger.info(s"=== NcoCounter Simulation, G_CLK_RATE = $C_MAIN_CLK Hz, G_OUTPUT_RATE = $C_OUT_CLK Hz")
@@ -61,7 +63,7 @@ object NcoCounterSim extends Logging {
           logger.info("=========== done")
         }
 
-        val monitor_output_rate = fork {
+        val measure_output_rate = fork {
 
           dut.clockDomain.waitRisingEdge()
 
@@ -83,8 +85,40 @@ object NcoCounterSim extends Logging {
           }
         }
 
-        monitor_output_rate.join()
+        val compare = fork {
+
+          dut.clockDomain.waitRisingEdge()
+
+          while (!dut.io.srst.toBoolean) {
+            dut.clockDomain.waitRisingEdge()
+          }
+
+          dut.clockDomain.waitRisingEdge()
+
+          val lines = fromFile("test/TV/output.tv").getLines
+
+          breakable {
+            for (line <- lines) {
+              dut.clockDomain.waitRisingEdge()
+              if (line.length == 0) {
+                break
+              }
+
+              val tv = line.stripLineEnd.split(" ").map(_.trim.toLong).toList
+              val simOut = List(dut.io.counterOut.toLong, if (dut.io.ncoPulse.toBoolean) 1 else 0)
+
+              assert(
+                tv == simOut,
+                s"!!! Test Vector mismatch, Expecting $tv, got $simOut"
+              )
+
+            }
+          }
+        }
+
+        measure_output_rate.join()
         clkThread.join()
+        compare.join()
 
         dut.clockDomain.waitRisingEdge(10)
         val measured: Double = outputPulseCnt.toDouble * 100 / runLength.toDouble

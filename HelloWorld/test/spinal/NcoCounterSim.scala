@@ -63,7 +63,7 @@ object NcoCounterSim extends Logging {
           logger.info("=========== done")
         }
 
-        val measure_output_rate = fork {
+        val measure = fork {
 
           dut.clockDomain.waitRisingEdge()
 
@@ -116,7 +116,7 @@ object NcoCounterSim extends Logging {
           }
         }
 
-        measure_output_rate.join()
+        measure.join()
         clkThread.join()
         compare.join()
 

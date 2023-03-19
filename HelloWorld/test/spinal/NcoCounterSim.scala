@@ -23,11 +23,12 @@ object NcoCounterSim extends Logging {
       }
       .doSim { dut =>
         dut.clockDomain.forkStimulus(1000000000 / C_MAIN_CLK)
-        val num_of_clks = 1000000
 
         var start = false
         var outputPulseCnt: Int = 0
         var runLength: Int = 0
+        var cmpDone = false
+        var cmpLength: Int = 0
 
         logger.info(" ")
         logger.info("====================================================================================")
@@ -56,7 +57,7 @@ object NcoCounterSim extends Logging {
           dut.clockDomain.waitRisingEdge(10)
 
           start = true
-          for (i <- 0 to num_of_clks) {
+          while (!cmpDone) {
             dut.clockDomain.waitRisingEdge()
           }
 
@@ -73,7 +74,7 @@ object NcoCounterSim extends Logging {
 
           dut.clockDomain.waitRisingEdge()
 
-          for (i <- 0 to num_of_clks) {
+          while (!cmpDone) {
             dut.clockDomain.waitRisingEdge()
 
             if (dut.io.ncoPulse.toBoolean) {
@@ -106,6 +107,7 @@ object NcoCounterSim extends Logging {
 
               val tv = line.stripLineEnd.split(" ").map(_.trim.toLong).toList
               val simOut = List(dut.io.counterOut.toLong, if (dut.io.ncoPulse.toBoolean) 1 else 0)
+              cmpLength = cmpLength + 1
 
               assert(
                 tv == simOut,
@@ -114,6 +116,8 @@ object NcoCounterSim extends Logging {
 
             }
           }
+
+          cmpDone = true
         }
 
         measure.join()
@@ -126,6 +130,7 @@ object NcoCounterSim extends Logging {
         logger.info(f"==== measured $outputPulseCnt / $runLength = $measured%2f MHz, expected $expected%2f MHz")
         if ((expected - measured).abs < 0.001) {
           logger.info("=== Output clock is accurate enough!")
+          logger.info(s"=== Total $cmpLength samples are matched!")
           simSuccess()
         } else {
           logger.info("=== Output clock is not accurate enough!")

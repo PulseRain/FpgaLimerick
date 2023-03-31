@@ -1,5 +1,5 @@
 ThisBuild / version := "1.0"
-ThisBuild / scalaVersion := "2.12.16"
+ThisBuild / scalaVersion := "2.13.0"
 ThisBuild / organization := "com.pulserain"
 ThisBuild / semanticdbEnabled := true
 ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
@@ -32,7 +32,7 @@ libraryDependencies ++= Seq(spinalCore, spinalLib, spinalIdslPlugin, log4jApi, l
 fork := true
 
 scalacOptions += "-deprecation"
-scalacOptions += "-Ywarn-unused-import"
+scalacOptions += "-Ywarn-unused" 
 scalacOptions += "-feature"
 scalacOptions += "-language:reflectiveCalls"
 

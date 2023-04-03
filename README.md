@@ -20,3 +20,6 @@ Repository for FPGA Limerick
 * _make_new_prj.sh_  
   You can use this script to make a new project folder based on the HelloWorld template  
 
+* _xilinx_simlib.sh_  
+  You can use this script to build Xilinx Simulation Library. Please make sure you setup XILINX_VIVADO and PATH correctly
+

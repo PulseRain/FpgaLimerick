@@ -47,11 +47,93 @@ test_param = [(100e6, 24e6), (100e6, 10e6), (50e6, 99e3)]
 top_folder = "../../.."
 gen_folder = top_folder + "/gen"
 generic_file = gen_folder + "/generics.txt"
+test_dir = os.path.abspath(os.path.dirname(__file__))
 
 ##################################################################################################
-
-test_dir = os.path.abspath(os.path.dirname(__file__))
+## Test Prepare
+##################################################################################################
+@pytest.mark.parametrize("G_CLK_RATE, G_OUTPUT_RATE", test_param)
+def test_nco(request, G_CLK_RATE, G_OUTPUT_RATE):
+        
+    module = os.path.splitext(os.path.basename(__file__))[0]
     
+    top = "NcoCounter"
+    dut = "work." + top
+    ##############################################################################################
+    ## Regenerate Verilog/VHDL
+    ##############################################################################################
+    
+    print (" ")
+    print ("==========================================================================")
+    print (f"=== regenerate {top} using SBT")
+    print ("==========================================================================")
+        
+    if (subprocess.call(["sbt", "runMain com.pulserain.fpga." + top + " " + str(int(G_CLK_RATE)) + " " + str(int(G_OUTPUT_RATE))], cwd=top_folder) != 0):
+      print ("!failed to regenerate!")
+      exit(1)
+    else:
+      with open (generic_file, 'w') as f:
+        f.write(str(int(G_CLK_RATE)))
+        f.write(" ")
+        f.write(str(int(G_OUTPUT_RATE)))
+        f.close()
+    
+    if (os.path.exists("sim_build/modelsim.ini")):
+        print (f"===> modelsim.ini already exists!!")
+    else:
+        lines = [r"[Library]", "\n",
+                 r"others = $MODEL_TECH/../modelsim.ini", "\n"]
+                 
+        os.makedirs("sim_build", exist_ok=True)
+        with open('sim_build/modelsim.ini', 'w') as f:
+            f.writelines(lines)
+            f.close()
+            
+    gui = request.config.getoption("--gui")
+    
+    verilog_sources = [
+        "../../../gen/NcoCounter.v"
+    ]
+    
+    ##############################################################################################
+    ## compile and sim
+    ##############################################################################################
+    
+    print ("==========================================================================")
+    print (f"=== Compile Verilog/VHDL and Run")
+    print ("==========================================================================")
+    
+    run(
+      python_search=[test_dir],
+      verilog_sources=verilog_sources,
+      vhdl_sources=[],
+      verilog_compile_args=["-64", "-mfcu", "-suppress", "12110"],
+      vhdl_compile_args=["-64", "-93"],
+      toplevel="work",
+      module=module,
+      parameters={},
+      compile_only=True,
+      gui=False
+    )
+    
+    run(
+      python_search=[test_dir],
+      verilog_sources=[],
+      vhdl_sources=[],
+      toplevel=dut,
+      module=module,
+      sim_args=['-64', "-suppress", "12110", '-voptargs=+acc', '-do', "add log -r sim:/*", '-wlf',
+          f"{dut}_{int(G_CLK_RATE)}_{int(G_OUTPUT_RATE)}.wlf"],
+      parameters={},
+      compile_only=False,
+      waves=True,
+      gui=gui
+    )
+
+
+##################################################################################################
+## Test Bench
+##################################################################################################
 class TB():
     def __init__(self, dut, clk_freq_in_Hz = 100e6, output_clk_in_Hz = 24e6):
       self.dut = dut
@@ -109,7 +191,8 @@ class TB():
       oldValue = self._counterValue
       self._counterValue = (self._counterValue + self._n) % self._m
       return oldValue
-      
+
+
     async def _check(self):
       while True:
         actual = await self.counterValue.get()
@@ -138,76 +221,12 @@ async def run_test_nco(dut, G_CLK_RATE, G_OUTPUT_RATE):
     await tb.run(100)
 
 
-@pytest.mark.parametrize("G_CLK_RATE, G_OUTPUT_RATE", test_param)
-def test_nco(request, G_CLK_RATE, G_OUTPUT_RATE):
-        
-    module = os.path.splitext(os.path.basename(__file__))[0]
-    
-    top = "NcoCounter"
-    dut = "work." + top
-    
-    print (f"regenerate {top} using SBT")
-    if (subprocess.call(["sbt", "runMain com.pulserain.fpga." + top + " " + str(int(G_CLK_RATE)) + " " + str(int(G_OUTPUT_RATE))], cwd=top_folder) != 0):
-      print ("!failed to regenerate!")
-      exit(1)
-    else:
-      with open (generic_file, 'w') as f:
-        f.write(str(int(G_CLK_RATE)))
-        f.write(" ")
-        f.write(str(int(G_OUTPUT_RATE)))
-        f.close()
-    
-    if (os.path.exists("sim_build/modelsim.ini")):
-        print (f"===> modelsim.ini already exists!!")
-    else:
-        lines = [r"[Library]", "\n",
-                 r"others = $MODEL_TECH/../modelsim.ini", "\n"]
-                 
-        os.makedirs("sim_build", exist_ok=True)
-        with open('sim_build/modelsim.ini', 'w') as f:
-            f.writelines(lines)
-            f.close()
-            
-    gui = request.config.getoption("--gui")
-    
-    verilog_sources = [
-        "../../../gen/NcoCounter.v"
-    ]
-    
-    
-    ##############################################################################################
-    ## Sim and Test Bench
-    ##############################################################################################
-    
-    run(
-      python_search=[test_dir],
-      verilog_sources=verilog_sources,
-      vhdl_sources=[],
-      verilog_compile_args=["-64", "-mfcu", "-suppress", "12110"],
-      vhdl_compile_args=["-64", "-93"],
-      toplevel="work",
-      module=module,
-      parameters={},
-      compile_only=True,
-      gui=False
-    )
-    
-    run(
-      python_search=[test_dir],
-      verilog_sources=[],
-      vhdl_sources=[],
-      toplevel=dut,
-      module=module,
-      sim_args=['-64', "-suppress", "12110", '-voptargs=+acc', '-do', "add log -r sim:/*", '-wlf',
-          f"{dut}_{int(G_CLK_RATE)}_{int(G_OUTPUT_RATE)}.wlf"],
-      parameters={},
-      compile_only=False,
-      waves=True,
-      gui=gui
-    )
-    
-
 if cocotb.SIM_NAME:
+
+    print ("==========================================================================")
+    print (f"====== Simulator: {cocotb.SIM_NAME}")
+    print ("==========================================================================")
+    
     f = open("../" + generic_file, 'r')
     generics = f.readline().split()
     (G_CLK_RATE, G_OUTPUT_RATE) = generics

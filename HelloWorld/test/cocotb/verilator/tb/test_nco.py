@@ -47,11 +47,70 @@ test_param = [(100e6, 24e6), (100e6, 10e6), (50e6, 99e3)]
 top_folder = "../../.."
 gen_folder = top_folder + "/gen"
 generic_file = gen_folder + "/generics.txt"
+test_dir = os.path.abspath(os.path.dirname(__file__))
+
 
 ##################################################################################################
-
-test_dir = os.path.abspath(os.path.dirname(__file__))
+## Test Prepare
+##################################################################################################
+@pytest.mark.parametrize("G_CLK_RATE, G_OUTPUT_RATE", test_param)
+def test_nco(request, G_CLK_RATE, G_OUTPUT_RATE):
+        
+    module = os.path.splitext(os.path.basename(__file__))[0]
     
+    top = "NcoCounter"
+    dut = "work." + top
+    
+    ##############################################################################################
+    ## Regenerate Verilog/VHDL
+    ##############################################################################################
+    
+    print (" ")
+    print ("==========================================================================")
+    print (f"=== regenerate {top} using SBT")
+    print ("==========================================================================")
+    
+    if (subprocess.call(["sbt", "runMain com.pulserain.fpga." + top + " " + str(int(G_CLK_RATE)) + " " + str(int(G_OUTPUT_RATE))], cwd=top_folder) != 0):
+      print ("!failed to regenerate!")
+      exit(1)
+    else:
+      with open (generic_file, 'w') as f:
+        f.write(str(int(G_CLK_RATE)))
+        f.write(" ")
+        f.write(str(int(G_OUTPUT_RATE)))
+        f.close()
+    
+    verilog_sources = [
+        "../../../gen/NcoCounter.v"
+    ]
+    
+    ##############################################################################################
+    ## compile and sim
+    ##############################################################################################
+    
+    print ("==========================================================================")
+    print (f"=== Compile Verilog/VHDL and Run")
+    print ("==========================================================================")
+    
+    run(
+      python_search=[test_dir],
+      verilog_sources=verilog_sources,
+      vhdl_sources=[],
+      toplevel=dut,
+      module=module,
+      sim_args=[],
+      extra_args=["--trace-fst", "--trace-structs"],
+      parameters={},
+      compile_only=False,
+      waves=True,
+      gui=False
+    )
+
+
+##################################################################################################
+## Test Bench
+##################################################################################################
+   
 class TB():
     def __init__(self, dut, clk_freq_in_Hz = 100e6, output_clk_in_Hz = 24e6):
       self.dut = dut
@@ -104,12 +163,13 @@ class TB():
         await RisingEdge(self.dut.clk)
         self.counterValue.put_nowait(self.dut.counterOut)
         
-      
+
     def model(self):
       oldValue = self._counterValue
       self._counterValue = (self._counterValue + self._n) % self._m
       return oldValue
       
+
     async def _check(self):
       while True:
         actual = await self.counterValue.get()
@@ -138,48 +198,12 @@ async def run_test_nco(dut, G_CLK_RATE, G_OUTPUT_RATE):
     await tb.run(100)
 
 
-@pytest.mark.parametrize("G_CLK_RATE, G_OUTPUT_RATE", test_param)
-def test_nco(request, G_CLK_RATE, G_OUTPUT_RATE):
-        
-    module = os.path.splitext(os.path.basename(__file__))[0]
-    
-    top = "NcoCounter"
-    dut = "work." + top
-    
-    print (f"regenerate {top} using SBT")
-    if (subprocess.call(["sbt", "runMain com.pulserain.fpga." + top + " " + str(int(G_CLK_RATE)) + " " + str(int(G_OUTPUT_RATE))], cwd=top_folder) != 0):
-      print ("!failed to regenerate!")
-      exit(1)
-    else:
-      with open (generic_file, 'w') as f:
-        f.write(str(int(G_CLK_RATE)))
-        f.write(" ")
-        f.write(str(int(G_OUTPUT_RATE)))
-        f.close()
-    
-    verilog_sources = [
-        "../../../gen/NcoCounter.v"
-    ]
-    
-    ##############################################################################################
-    ## Sim and Test Bench
-    ##############################################################################################
-        
-    run(
-      python_search=[test_dir],
-      verilog_sources=verilog_sources,
-      vhdl_sources=[],
-      toplevel=dut,
-      module=module,
-      sim_args=[],
-      extra_args=["--trace-fst", "--trace-structs"],
-      parameters={},
-      compile_only=False,
-      waves=True,
-      gui=False
-    )
-
 if cocotb.SIM_NAME:
+    
+    print ("==========================================================================")
+    print (f"====== Simulator: {cocotb.SIM_NAME}")
+    print ("==========================================================================")
+    
     f = open("../" + generic_file, 'r')
     generics = f.readline().split()
     (G_CLK_RATE, G_OUTPUT_RATE) = generics
@@ -189,4 +213,3 @@ if cocotb.SIM_NAME:
       factory.add_option("G_CLK_RATE", [int(G_CLK_RATE)])
       factory.add_option("G_OUTPUT_RATE", [int(G_OUTPUT_RATE)])
       factory.generate_tests()
-      

@@ -57,8 +57,8 @@ def test_ddr(request, G_SYS_CLK, G_REF_CLK):
         
     module = os.path.splitext(os.path.basename(__file__))[0]
     
-    top = "NcoCounter"
-    dut = "work." + top
+    top = "dut"
+    dut = "xil_defaultlib." + top
     with open (generic_file, 'w') as f:
       f.write(str(int(G_SYS_CLK)))
       f.write(" ")
@@ -178,8 +178,12 @@ def test_ddr(request, G_SYS_CLK, G_REF_CLK):
         "../../../synth/ddr_ex/ddr_ex.gen/sources_1/ip/ddr/ddr/user_design/rtl/ui/mig_7series_v4_2_ui_rd_data.v",
         "../../../synth/ddr_ex/ddr_ex.gen/sources_1/ip/ddr/ddr/user_design/rtl/ui/mig_7series_v4_2_ui_top.v",
         "../../../synth/ddr_ex/ddr_ex.gen/sources_1/ip/ddr/ddr/user_design/rtl/ui/mig_7series_v4_2_ui_wr_data.v",
-        "../../../synth/ddr_ex/ddr_ex.gen/sources_1/ip/ddr/ddr/user_design/rtl/ex_ddr_mig_sim.v",
-        "../../../synth/ddr_ex/ddr_ex.gen/sources_1/ip/ddr/ddr/user_design/rtl/ex_ddr.v"
+        "../../../synth/ddr_ex/ddr_ex.gen/sources_1/ip/ddr/ddr/user_design/rtl/ddr_mig_sim.v",
+        "../../../synth/ddr_ex/ddr_ex.gen/sources_1/ip/ddr/ddr/user_design/rtl/ddr.v",
+        "../../../synth/ddr_ex/imports/ddr3_model.sv",
+        "../../../synth/ddr_ex/ddr_ex.ip_user_files/sim_scripts/ddr/questa/glbl.v",
+
+        "../../../test/verilog/dut.v"
     ]
     
     ##############################################################################################
@@ -203,21 +207,27 @@ def test_ddr(request, G_SYS_CLK, G_REF_CLK):
       gui=False
     )
     
-    # run(
-      # python_search=[test_dir],
-      # verilog_sources=[],
-      # vhdl_sources=[],
-      # toplevel=dut,
-      # module=module,
-      # sim_args=['-64', "-suppress", "12110", '-voptargs=+acc', '-do', "add log -r sim:/*", '-wlf',
-          # f"{dut}_{int(G_CLK_RATE)}_{int(G_OUTPUT_RATE)}.wlf"],
-      # parameters={},
-      # compile_only=False,
-      # waves=True,
-      # gui=gui
-    # )
-
-
+    run(
+      python_search=[test_dir],
+      verilog_sources=[],
+      vhdl_sources=[],
+      toplevel=dut,
+      module=module,
+      sim_args=['-64', "-suppress", "12110", '-voptargs=+acc', '-do', "add log -r sim:/*", '-wlf',
+                f"{dut}_{int(G_SYS_CLK)}_{int(G_REF_CLK)}.wlf",
+                "-Ldir", "../../../../../common/XilinxSimLib",
+                "-L", "xil_defaultlib", 
+                "-L", "unisims_ver", 
+                "-L", "unimacro_ver", 
+                "-L", "secureip",
+                "-work", "xil_defaultlib",
+                "xil_defaultlib.glbl"],
+      parameters={},
+      compile_only=False,
+      waves=True,
+      gui=gui
+    )
+    
 ##################################################################################################
 ## Test Bench
 ##################################################################################################
@@ -228,73 +238,35 @@ class TB():
       self.log = logging.getLogger("cocotb.tb")
       self.log.setLevel(logging.DEBUG)
         
-      self.dut.resetn.value = 1
-      self.dut.srst.value = 0
-      self.counterValue = Queue[int]()
-      
-      _gcd = np.gcd(int(clk_freq_in_Hz), int(output_clk_in_Hz))
-      self._m = clk_freq_in_Hz / _gcd
-      self._n = output_clk_in_Hz / _gcd
-      self._counterValue = 0
-      
-      self.log.info ("m = %d, n = %d\n", self._m, self._n)
-                
-      cocotb.start_soon(Clock(dut.clk, round (1e9 / clk_freq_in_Hz, 2), units="ns").start())
+      self.dut.aresetn.value = 1
+      self.dut.sys_rst_n.value = 1
+            
+      cocotb.start_soon(Clock(dut.sys_clk, round (1e9 / sys_clk_in_Hz, 2), units="ns").start())
+      cocotb.start_soon(Clock(dut.ref_clk, round (1e9 / ref_clk_in_Hz, 2), units="ns").start())
         
     async def clk_wait(self, num_of_clks = 1):
       for i in range(num_of_clks):
-          await RisingEdge(self.dut.clk)
+          await RisingEdge(self.dut.sys_clk)
             
     async def reset(self):
-      self.dut.resetn.value = 1
+      self.dut.aresetn.value = 1
+      self.dut.sys_rst_n.value = 1
       await self.clk_wait(2)
-      self.dut.resetn.value = 0
-      await Timer (50, units='ns')
+      self.dut.aresetn.value = 0
+      await Timer (200, units='ns')
       await self.clk_wait(2)
-      self.dut.resetn.value = 1
+      self.dut.aresetn.value = 1
       await self.clk_wait(10)
-  
-    async def sync_reset(self):
-      self.dut.srst.value = 0
+      
+      self.dut.sys_rst_n.value = 0
+      await Timer (200, units='ns')
+      self.dut.sys_rst_n.value = 1
       await self.clk_wait(10)
-      self.dut.srst.value = 1
-      await self.clk_wait(1)
-      self.dut.srst.value = 0
-      await self.clk_wait()
-    
-    
-    async def _monitor(self):
-      while True:
-        await RisingEdge(self.dut.clk)
-        if (self.dut.srst.value == 1):
-          self.log.info ("=========== got sync reset!")
-          break
       
-      while True:
-        await RisingEdge(self.dut.clk)
-        self.counterValue.put_nowait(self.dut.counterOut)
-        
-      
-    def model(self):
-      oldValue = self._counterValue
-      self._counterValue = (self._counterValue + self._n) % self._m
-      return oldValue
 
-
-    async def _check(self):
-      while True:
-        actual = await self.counterValue.get()
-        expected = self.model()
-        self.log.info ("actual = %d, expected = %d", actual, expected)
-        assert (actual == expected)  
-        
-        
     async def run(self, time_in_us):
-      cocotb.start_soon(self._monitor())
-      cocotb.start_soon(self._check())
       await self.reset()
       self.log.info ("=========== start")
-      await self.sync_reset()
       await Timer (time_in_us, units='us')     
       self.log.info ("=========== finish")
 
@@ -306,7 +278,7 @@ async def run_test_ddr(dut, G_SYS_CLK, G_REF_CLK):
     tb = TB(dut, sys_clk_in_Hz=G_SYS_CLK, ref_clk_in_Hz=G_REF_CLK)
     
     tb.log.info ("======================== run test DDR ==========================")
-    await tb.run(100)
+    await tb.run(30)
 
 
 if cocotb.SIM_NAME:

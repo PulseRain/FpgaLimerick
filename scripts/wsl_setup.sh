@@ -34,6 +34,7 @@ sudo apt-get install autoconf -y
 sudo apt-get install flex -y
 sudo apt-get install bison -y
 sudo apt-get install gtkwave -y
+sudo apt install dos2unix -y
 
 ##############################################################################
 # Install Verilator

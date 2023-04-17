@@ -43,7 +43,7 @@ add_files -norecurse ../src/verilog/JtagDDR_ArtyA7_100T.sv
 add_files -fileset constrs_1 -norecurse constraints/ArtyA7_100T.xdc
 
 set_property top JtagDDR_ArtyA7_100T [current_fileset]
-
+set_property STEPS.WRITE_BITSTREAM.ARGS.BIN_FILE true [get_runs impl_1]
 
 
 #============================================================================

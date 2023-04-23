@@ -35,6 +35,9 @@ sudo apt-get install flex -y
 sudo apt-get install bison -y
 sudo apt-get install gtkwave -y
 sudo apt install dos2unix -y
+sudo apt-get install iverilog -y
+sudo apt install python3-pip -y
+sudo apt install -y git make gnat zlib1g-dev
 
 ##############################################################################
 # Install Verilator

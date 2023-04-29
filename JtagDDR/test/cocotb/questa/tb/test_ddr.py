@@ -185,11 +185,12 @@ def test_ddr(request, G_SYS_CLK, G_REF_CLK):
       "../../../synth/ddr_ex/imports/ddr3_model.sv",
       "../../../synth/ddr_ex/ddr_ex.ip_user_files/sim_scripts/ddr/questa/glbl.v"
       
-      ,"../../../test/verilog/dut.v"
+      ##,"../../../test/verilog/dut.v"
+      ,"../../../test/verilog/dut.sv"
   ]
   
   xil_defaultlib_vhdl_sources = [
-     ### "../../../test/vhdl/dut.vhd"
+      "../../../test/vhdl/dut_core.vhd"
   ]
   
   ##############################################################################################
@@ -227,7 +228,8 @@ def test_ddr(request, G_SYS_CLK, G_REF_CLK):
               "-L", "unisims_ver", 
               "-L", "unimacro_ver", 
               "-L", "secureip",
-              "-work", "xil_defaultlib",
+              "-L", "unisim", 
+               "-work", "xil_defaultlib",
               "xil_defaultlib.glbl"],
     parameters={},
     compile_only=False,

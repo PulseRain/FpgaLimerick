@@ -22,7 +22,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_misc.all;
 
-entity dut is
+entity dut_core is
   port (
     sys_clk       : in std_logic;
     ref_clk       : in std_logic;
@@ -70,9 +70,9 @@ entity dut is
     s_axi_rlast   : out std_logic;
     s_axi_rvalid  : out std_logic
   );
-end entity dut;
+end entity dut_core;
 
-architecture rtl of dut is
+architecture rtl of dut_core is
 
   ----------------------------------------------------------------------------
   -- components

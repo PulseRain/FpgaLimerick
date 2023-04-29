@@ -183,9 +183,13 @@ def test_ddr(request, G_SYS_CLK, G_REF_CLK):
       "../../../synth/ddr_ex/ddr_ex.gen/sources_1/ip/ddr/ddr/user_design/rtl/ddr_mig_sim.v",
       "../../../synth/ddr_ex/ddr_ex.gen/sources_1/ip/ddr/ddr/user_design/rtl/ddr.v",
       "../../../synth/ddr_ex/imports/ddr3_model.sv",
-      "../../../synth/ddr_ex/ddr_ex.ip_user_files/sim_scripts/ddr/questa/glbl.v",
-
-      "../../../test/verilog/dut.v"
+      "../../../synth/ddr_ex/ddr_ex.ip_user_files/sim_scripts/ddr/questa/glbl.v"
+      
+      ,"../../../test/verilog/dut.v"
+  ]
+  
+  xil_defaultlib_vhdl_sources = [
+     ### "../../../test/vhdl/dut.vhd"
   ]
   
   ##############################################################################################
@@ -199,9 +203,9 @@ def test_ddr(request, G_SYS_CLK, G_REF_CLK):
   run(
     python_search=[test_dir],
     verilog_sources=xil_defaultlib_verilog_sources,
-    vhdl_sources=[],
+    vhdl_sources=xil_defaultlib_vhdl_sources,
     verilog_compile_args=["-64", "-mfcu", "-suppress", "12110"],
-    vhdl_compile_args=["-64", "-93"],
+    vhdl_compile_args=["-64", "-93", "-suppress", "12110"],
     toplevel="xil_defaultlib",
     module=module,
     parameters={},
@@ -215,8 +219,9 @@ def test_ddr(request, G_SYS_CLK, G_REF_CLK):
     vhdl_sources=[],
     toplevel=dut,
     module=module,
-    sim_args=['-64', "-suppress", "12110", '-voptargs=+acc', '-do', "add log -r sim:/*", '-wlf',
-              f"{dut}_{int(G_SYS_CLK)}_{int(G_REF_CLK)}.wlf",
+    sim_args=['-64', "-suppress", "12110", '-voptargs=+acc', '-t', 'fs',
+              '-do', "add log -r sim:/*",
+              '-wlf', f"{dut}_{int(G_SYS_CLK)}_{int(G_REF_CLK)}.wlf",
               "-Ldir", "../../../../../common/XilinxSimLib",
               "-L", "xil_defaultlib", 
               "-L", "unisims_ver", 

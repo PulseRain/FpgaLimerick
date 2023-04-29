@@ -74,8 +74,10 @@ mkdir -p $dir_path/test/verilog
 
 mkdir -p $dir_path/test/cocotb/verilator/tb
 mkdir -p $dir_path/test/cocotb/questa/tb
+mkdir -p $dir_path/test/cocotb/icarus/tb
 
 cp -f $repo_root/HelloWorld/test/cocotb/questa/tox.ini $dir_path/test/cocotb/questa
 cp -f $repo_root/HelloWorld/test/cocotb/questa/conftest.py $dir_path/test/cocotb/questa
 
 cp -f $repo_root/HelloWorld/test/cocotb/verilator/tox.ini $dir_path/test/cocotb/verilator
+cp -f $repo_root/HelloWorld/test/cocotb/icarus/tox.ini $dir_path/test/cocotb/icarus

@@ -223,7 +223,7 @@ def test_ddr(request, G_SYS_CLK, G_REF_CLK):
     sim_args=['-64', "-suppress", "12110", '-voptargs=+acc', '-t', 'fs',
               '-do', "add log -r sim:/*",
               '-wlf', f"{dut}_{int(G_SYS_CLK)}_{int(G_REF_CLK)}.wlf",
-              "-Ldir", "../../../../../common/XilinxSimLib",
+              "-Ldir", "../../../../../../common/XilinxSimLib",
               "-L", "xil_defaultlib", 
               "-L", "unisims_ver", 
               "-L", "unimacro_ver", 

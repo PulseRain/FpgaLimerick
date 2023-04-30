@@ -50,22 +50,22 @@ fi
 
 set -x
 
-cp -f $repo_root/HelloWorld/build.sbt $dir_path; 
-cp -f $repo_root/HelloWorld/.scalafix.conf $dir_path;
+cp -f $repo_root/prj/HelloWorld/build.sbt $dir_path; 
+cp -f $repo_root/prj/HelloWorld/.scalafix.conf $dir_path;
 
-cp -f $repo_root/HelloWorld/.scalafmt.conf $dir_path
-cp -f $repo_root/HelloWorld/scalastyle-config.xml $dir_path
+cp -f $repo_root/prj/HelloWorld/.scalafmt.conf $dir_path
+cp -f $repo_root/prj/HelloWorld/scalastyle-config.xml $dir_path
 
 mkdir -p $dir_path/project
-cp -f $repo_root/HelloWorld/project/build.properties $dir_path/project
-cp -f $repo_root/HelloWorld/project/plugins.sbt $dir_path/project
+cp -f $repo_root/prj/HelloWorld/project/build.properties $dir_path/project
+cp -f $repo_root/prj/HelloWorld/project/plugins.sbt $dir_path/project
 
 
 mkdir -p $dir_path/src/spinal
 mkdir -p $dir_path/src/verilog
 mkdir -p $dir_path/src/main/resources
 
-cp -f $repo_root/HelloWorld/src/main/resources/log4j2.xml $dir_path/src/main/resources
+cp -f $repo_root/prj/HelloWorld/src/main/resources/log4j2.xml $dir_path/src/main/resources
 
 
 mkdir -p $dir_path/test/spinal
@@ -76,8 +76,8 @@ mkdir -p $dir_path/test/cocotb/verilator/tb
 mkdir -p $dir_path/test/cocotb/questa/tb
 mkdir -p $dir_path/test/cocotb/icarus/tb
 
-cp -f $repo_root/HelloWorld/test/cocotb/questa/tox.ini $dir_path/test/cocotb/questa
-cp -f $repo_root/HelloWorld/test/cocotb/questa/conftest.py $dir_path/test/cocotb/questa
+cp -f $repo_root/prj/HelloWorld/test/cocotb/questa/tox.ini $dir_path/test/cocotb/questa
+cp -f $repo_root/prj/HelloWorld/test/cocotb/questa/conftest.py $dir_path/test/cocotb/questa
 
-cp -f $repo_root/HelloWorld/test/cocotb/verilator/tox.ini $dir_path/test/cocotb/verilator
-cp -f $repo_root/HelloWorld/test/cocotb/icarus/tox.ini $dir_path/test/cocotb/icarus
+cp -f $repo_root/prj/HelloWorld/test/cocotb/verilator/tox.ini $dir_path/test/cocotb/verilator
+cp -f $repo_root/prj/HelloWorld/test/cocotb/icarus/tox.ini $dir_path/test/cocotb/icarus

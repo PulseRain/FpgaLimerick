@@ -15,7 +15,7 @@ val log4jCore = "org.apache.logging.log4j" % "log4j-core" % "2.19.0" % Runtime
 
 
 Compile / scalaSource := baseDirectory.value / "src" / "spinal"
-Compile / unmanagedSourceDirectories += baseDirectory.value / "../common"
+Compile / unmanagedSourceDirectories += baseDirectory.value / "../../common"
 Compile / unmanagedSourceDirectories += baseDirectory.value / "test" / "spinal"
 
 Test / scalaSource := baseDirectory.value / "test" / "spinal"
